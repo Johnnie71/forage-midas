@@ -8,6 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 
+import com.jpmc.midascore.entity.UserRecord;
+import com.jpmc.midascore.repository.UserRepository;
+
 @SpringBootTest
 @DirtiesContext
 @EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
@@ -23,6 +26,9 @@ public class TaskThreeTests {
     @Autowired
     private FileLoader fileLoader;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Test
     void task_three_verifier() throws InterruptedException {
         userPopulator.populate();
@@ -31,6 +37,14 @@ public class TaskThreeTests {
             kafkaProducer.send(transactionLine);
         }
         Thread.sleep(2000);
+
+        UserRecord sender = userRepository.findByName("waldorf");
+
+        if (sender != null) {
+            logger.info("Sender found: " + sender);
+        } else {
+            logger.warn("Sender not found!");
+        }
 
 
         logger.info("----------------------------------------------------------");
